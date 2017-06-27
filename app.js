@@ -1,9 +1,11 @@
 var serialport = require('serialport'),
-    plotly = require('plotly')('lschlee','G6Gtt9R5CUb9qJUEWRzB'),
-    token = 'iww321azkt';
+    plotly = require('plotly')('login','key'),
+    token = 'token';
 
-var portName = '/dev/ttyACM0';
-var sp = new serialport(portName,{
+var fileName = 'Name of the file';
+
+var portName = 'PortName';
+var serialPortObject = new serialport(portName,{
     baudRate: 9600,
     dataBits: 8,
     parity: 'none',
@@ -22,21 +24,20 @@ function getDateString() {
 }
 
 var initdata = [{x:[], y:[], stream:{token:token, maxpoints: 500}}];
-var initlayout = {fileopt : "extend", filename : "canto-test"};
+var initlayout = {fileopt : "extend", filename : fileName};
 
 plotly.plot(initdata, initlayout, function (err, msg) {
     if (err) return console.log(err)
 
-    console.log(msg);
     var stream = plotly.stream(token, function (err, res) {
         console.log(err, res);
     });
 
-    sp.on('data', function(input) {
-        if(isNaN(input) || input > 1023) return;
+    serialPortObject.on('data', function(temperature) {
+        
+        if(isNaN(temperature) || temperature > 1023) return;
 
-    var streamObject = JSON.stringify({ x : getDateString(), y : input });
-    console.log(streamObject);
-    stream.write(streamObject+'\n');
+        var streamObject = JSON.stringify({ x : getDateString(), y : temperature });
+        stream.write(streamObject+'\n');
     });
 });
